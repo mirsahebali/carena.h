@@ -1,0 +1,5 @@
+tests.i
+*.i
+tmp
+build
+out
