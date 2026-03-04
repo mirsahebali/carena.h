@@ -1,7 +1,32 @@
 # Memory Arena + Arena allocated dynamic array implementation in C11
 
 
-## API
+## Usage
+To use it in your project just get it by:
+- curl
+```bash
+curl -O https://raw.githubusercontent.com/mirsahebali/carena.h/refs/heads/main/carena.h
+
+```
+- wget
+
+```bash
+wget https://raw.githubusercontent.com/mirsahebali/carena.h/refs/heads/main/carena.h
+```
+- git 
+```bash
+git clone --depth 1 https://github.com/mirsahebali/carena.h
+
+```
+
+
+## Using in your project
+```c
+#define CARENA_IMPLEMENTATION
+#include "path/of/deps/carena.h"
+
+```
+## Reference
 
 ### Arena API
 ```c
@@ -52,3 +77,5 @@ ARRAY_HEADER_T(array, type);
 > [NOTE]
 > No need to free the array as it allocated in the arena, it will automatically rellocated when elements are pushed
 > It will all be freed at once
+
+
