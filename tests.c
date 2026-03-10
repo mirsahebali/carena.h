@@ -27,7 +27,7 @@ FN_TEST(test_array_gen, {
 
   for (size_t i = 0; i < 78; i++) {
 
-    char *buf = ARENA_ALLOC(&arena, char, 1);
+    char *buf = ARENA_ALLOC(&arena, char, 30);
     snprintf(buf, 30, "hello %zu", i);
     ARRAY_PUSH(my_struct_array, TestStruct1, ((TestStruct1){i * 10, buf}));
   }
@@ -40,6 +40,6 @@ FN_TEST(test_array_gen, {
   }
 
   arena_destroy(&arena);
-});
+})
 
 int main() { test_array_gen(); }

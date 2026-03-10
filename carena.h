@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 
 #define IS_POWER_OF_TWO(x) (x != 0 && (x & (x - 1)))
+#define _ARRAY_DEFAULT_INIT_CAPACITY 16
 
 typedef struct Arena {
   void *data;
@@ -78,7 +79,8 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
 
 // convenience macros
 #define ARRAY_INIT(arena, type)                                                \
-  array_init(arena, sizeof(type), 16, alignof(type))
+  (type *)array_init(arena, sizeof(type), _ARRAY_DEFAULT_INIT_CAPACITY,        \
+                     alignof(type))
 
 #define PADDED_HEADER_SIZE(alignment)                                          \
   ((sizeof(_ArrayHeader) + (alignment - 1)) & ~(alignment - 1))
