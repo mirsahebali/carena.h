@@ -45,7 +45,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 
 #define IS_POWER_OF_TWO(x) (x != 0 && (x & (x - 1)))
-#define _ARRAY_DEFAULT_INIT_CAPACITY 16
+#define _CARENA_ARRAY_DEFAULT_INIT_CAPACITY 16
+
+#if defined(__GNUC__) || defined(__clang__)
+// Use the compiler-specific keyword/operator
+#define _CARENA_ALIGNOF(T) __alignof__(T)
+#else
+// Fallback to the portable C89/C99 trick
+#define _CARENA_ALIGNOF(T)                                                     \
+  offsetof(                                                                    \
+      struct {                                                                 \
+        char c;                                                                \
+        T member;                                                              \
+      },                                                                       \
+      member)
+#endif
 
 typedef struct Arena {
   void *data;
@@ -58,7 +72,7 @@ Arena arena_init(size_t size);
 static inline uintptr_t align_forward(uintptr_t data_ptr, size_t alignment);
 void *arena_alloc(Arena *self, size_t size, size_t alignment);
 #define ARENA_ALLOC(arena, type, length)                                       \
-  arena_alloc(arena, sizeof(type) * length, alignof(type))
+  arena_alloc(arena, sizeof(type) * length, _CARENA_ALIGNOF(type))
 void arena_reset(Arena *self);
 void arena_free(Arena *self);
 void arena_destroy(Arena *self);
@@ -79,8 +93,8 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
 
 // convenience macros
 #define ARRAY_INIT(arena, type)                                                \
-  (type *)array_init(arena, sizeof(type), _ARRAY_DEFAULT_INIT_CAPACITY,        \
-                     alignof(type))
+  (type *)array_init(arena, sizeof(type), _CARENA_ARRAY_DEFAULT_INIT_CAPACITY, \
+                     _CARENA_ALIGNOF(type))
 
 #define PADDED_HEADER_SIZE(alignment)                                          \
   ((sizeof(_ArrayHeader) + (alignment - 1)) & ~(alignment - 1))
@@ -89,7 +103,8 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
   ((_ArrayHeader *)((char *)(array) - PADDED_HEADER_SIZE(alignment)))
 
 #define PADDED_HEADER_SIZE_T(type)                                             \
-  ((sizeof(_ArrayHeader) + (alignof(type) - 1)) & ~(alignof(type) - 1))
+  ((sizeof(_ArrayHeader) + (_CARENA_ALIGNOF(type) - 1)) &                      \
+   ~(_CARENA_ALIGNOF(type) - 1))
 
 #define ARRAY_HEADER_T(array, type)                                            \
   ((_ArrayHeader *)((char *)(array) - PADDED_HEADER_SIZE_T(type)))
@@ -101,8 +116,8 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
 #define ARRAY_PUSH(array, type, data)                                          \
   do {                                                                         \
     _ArrayHeader *header = ARRAY_HEADER_T(array, type);                        \
-    void *new_ptr =                                                            \
-        array_reserve(array, sizeof(type), alignof(type), header->length + 1); \
+    void *new_ptr = array_reserve(array, sizeof(type), _CARENA_ALIGNOF(type),  \
+                                  header->length + 1);                         \
     assert(new_ptr != NULL);                                                   \
     header = ARRAY_HEADER_T(new_ptr, type);                                    \
     array = new_ptr;                                                           \
@@ -110,7 +125,7 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
   } while (0)
 
 #define ARRAY_GET_REF(array, type, index)                                      \
-  ((type *)array_get(array, sizeof(type), alignof(type), index))
+  ((type *)array_get(array, sizeof(type), _CARENA_ALIGNOF(type), index))
 
 #define ARRAY_GET(array, type, index) (*ARRAY_GET_REF(array, type, index))
 
