@@ -1,4 +1,4 @@
-# Memory Arena + Arena allocated dynamic array implementation in C11
+# Memory Arena + Arena allocated dynamic array implementation in C99
 
 
 ## Usage
