@@ -47,11 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define IS_POWER_OF_TWO(x) (x != 0 && (x & (x - 1)))
 #define _CARENA_ARRAY_DEFAULT_INIT_CAPACITY 16
 
-#if defined(__GNUC__) || defined(__clang__)
-// Use the compiler-specific keyword/operator
+#if __STDC_VERSION__ >= 201112L // Check for C11 or newer
+#define _CARENA_ALIGNOF(T) _Alignof(T)
+#elif defined(__GNUC__) || defined(__clang__)
 #define _CARENA_ALIGNOF(T) __alignof__(T)
 #else
-// Fallback to the portable C89/C99 trick
 #define _CARENA_ALIGNOF(T)                                                     \
   offsetof(                                                                    \
       struct {                                                                 \
