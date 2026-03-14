@@ -98,6 +98,9 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
   (type *)array_init(arena, sizeof(type), _CARENA_ARRAY_DEFAULT_INIT_CAPACITY, \
                      _CARENA_ALIGNOF(type))
 
+#define ARRAY_WITH_CAPACITY(arena, type, capacity)                             \
+  (type *)array_init(arena, sizeof(type), capacity, _CARENA_ALIGNOF(type))
+
 #define PADDED_HEADER_SIZE(alignment)                                          \
   ((sizeof(_ArrayHeader) + (alignment - 1)) & ~(alignment - 1))
 
@@ -187,7 +190,7 @@ void *array_init(Arena *arena, size_t item_size, size_t capacity,
   size_t padded_header_size =
       (header_size + (alignment - 1)) & ~(alignment - 1);
 
-  capacity = capacity ? capacity : 8;
+  capacity = capacity ? capacity : 16;
   size_t total_size = padded_header_size + (item_size * capacity);
 
   _ArrayHeader *header =
