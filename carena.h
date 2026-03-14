@@ -86,6 +86,8 @@ typedef struct {
 
 void *array_init(Arena *arena, size_t item_size, size_t capacity,
                  size_t alignment);
+void *array_reserve(const void *array, size_t item_size, size_t alignment,
+                    size_t new_size);
 size_t array_push(void *array, void *data);
 void *array_get(void *array, size_t item_size, size_t alignment, size_t index);
 void *array_get_ref(void *array, size_t item_size, size_t alignment,
