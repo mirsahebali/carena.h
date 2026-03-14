@@ -131,8 +131,6 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
 
 #endif // !CARENA_H
 
-#define CARENA_IMPLEMENTATION
-
 #ifdef CARENA_IMPLEMENTATION
 
 Arena arena_init(size_t size) {
