@@ -5,7 +5,7 @@ tests: check
 
 check:
 	mkdir -p build
-	gcc tests.c -std=c99 -ggdb -Wall -fsanitize=undefined,address -o build/tests
+	gcc tests.c -std=c23 -ggdb -Wall -Wextra -pedantic -fsanitize=undefined,address -o build/tests
 	@echo "Compiled Successfully"
 
 

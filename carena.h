@@ -88,7 +88,10 @@ void *array_init(Arena *arena, size_t item_size, size_t capacity,
                  size_t alignment);
 void *array_reserve(const void *array, size_t item_size, size_t alignment,
                     size_t new_size);
-size_t array_push(void *array, void *data);
+/* internally we are doing memcpy for data from bytes, so we don't own it,
+ * therefore 'data' should be freed separately */
+void *array_push(void *array, void *data, size_t data_type_size,
+                 size_t alignment);
 void *array_get(void *array, size_t item_size, size_t alignment, size_t index);
 void *array_get_ref(void *array, size_t item_size, size_t alignment,
                     size_t index);
@@ -119,16 +122,21 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
 #define ARRAY_CAPACITY(array, type) (ARRAY_HEADER_T(array, type)->capacity)
 
 #define ARRAY_PUSH(array, type, data)                                          \
-  do {                                                                         \
-    assert(array != NULL);                                                     \
-    _ArrayHeader *header = ARRAY_HEADER_T(array, type);                        \
-    void *new_ptr = array_reserve(array, sizeof(type), _CARENA_ALIGNOF(type),  \
-                                  header->length + 1);                         \
-    assert(new_ptr != NULL);                                                   \
-    header = ARRAY_HEADER_T(new_ptr, type);                                    \
-    array = (type *)new_ptr;                                                   \
-    array[header->length++] = data;                                            \
-  } while (0)
+  (type *)array_push((void *)array, (void *)data, sizeof(type),                \
+                     _CARENA_ALIGNOF(type))
+
+// #define _ARRAY_PUSH(array, type, data) \
+//   do { \
+//     assert(array != NULL); \
+//     _ArrayHeader *header = ARRAY_HEADER_T(array, type); \
+//     void *new_ptr = array_reserve(array, sizeof(type), _CARENA_ALIGNOF(type),
+//     \
+//                                   header->length + 1); \
+//     assert(new_ptr != NULL); \
+//     header = ARRAY_HEADER_T(new_ptr, type); \
+//     array = (type *)new_ptr; \
+//     array[header->length++] = data; \
+//   } while (0)
 
 #define ARRAY_GET_REF(array, type, index)                                      \
   ((type *)array_get(array, sizeof(type), _CARENA_ALIGNOF(type), index))
@@ -136,6 +144,8 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
 #define ARRAY_GET(array, type, index) (*ARRAY_GET_REF(array, type, index))
 
 #endif // !CARENA_H
+
+#define CARENA_IMPLEMENTATION
 
 #ifdef CARENA_IMPLEMENTATION
 
@@ -254,6 +264,20 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
   assert(index < header->length);
 
   return (char *)array + (index * item_size);
+}
+
+void *array_push(void *array, void *data, size_t data_type_size,
+                 size_t alignment) {
+  assert(array != NULL);
+  _ArrayHeader *header = ARRAY_HEADER(array, alignment);
+  void *new_ptr =
+      array_reserve(array, data_type_size, alignment, header->length + 1);
+  assert(new_ptr != NULL);
+  header = ARRAY_HEADER(new_ptr, alignment);
+  memcpy((char *)new_ptr + (data_type_size * header->length++), data,
+         data_type_size);
+
+  return new_ptr;
 }
 
 #endif // CARENA_IMPLEMENTATION
