@@ -120,6 +120,7 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
 
 #define ARRAY_PUSH(array, type, data)                                          \
   do {                                                                         \
+    assert(array != NULL);                                                     \
     _ArrayHeader *header = ARRAY_HEADER_T(array, type);                        \
     void *new_ptr = array_reserve(array, sizeof(type), _CARENA_ALIGNOF(type),  \
                                   header->length + 1);                         \
