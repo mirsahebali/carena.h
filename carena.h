@@ -125,7 +125,7 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
                                   header->length + 1);                         \
     assert(new_ptr != NULL);                                                   \
     header = ARRAY_HEADER_T(new_ptr, type);                                    \
-    array = new_ptr;                                                           \
+    array = (type *)new_ptr;                                                   \
     array[header->length++] = data;                                            \
   } while (0)
 
