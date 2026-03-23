@@ -125,19 +125,6 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
   (type *)array_push((void *)array, (void *)data, sizeof(type),                \
                      _CARENA_ALIGNOF(type))
 
-// #define _ARRAY_PUSH(array, type, data) \
-//   do { \
-//     assert(array != NULL); \
-//     _ArrayHeader *header = ARRAY_HEADER_T(array, type); \
-//     void *new_ptr = array_reserve(array, sizeof(type), _CARENA_ALIGNOF(type),
-//     \
-//                                   header->length + 1); \
-//     assert(new_ptr != NULL); \
-//     header = ARRAY_HEADER_T(new_ptr, type); \
-//     array = (type *)new_ptr; \
-//     array[header->length++] = data; \
-//   } while (0)
-
 #define ARRAY_GET_REF(array, type, index)                                      \
   ((type *)array_get(array, sizeof(type), _CARENA_ALIGNOF(type), index))
 
@@ -247,7 +234,7 @@ void *array_get(void *array, size_t item_size, size_t alignment, size_t index) {
   _ArrayHeader *header = ARRAY_HEADER(array, alignment);
   assert(header != NULL);
   assert(header->alignment == alignment);
-  assert(index < header->length && index >= 0);
+  assert(index < header->length);
 
   return (char *)array + (index * item_size);
 }
@@ -258,7 +245,6 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
   _ArrayHeader *header = ARRAY_HEADER(array, alignment);
   assert(header != NULL);
   assert(header->alignment == alignment);
-  assert(index >= 0);
   assert(index < header->length);
 
   return (char *)array + (index * item_size);
