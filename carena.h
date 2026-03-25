@@ -122,7 +122,7 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
 #define ARRAY_CAPACITY(array, type) (ARRAY_HEADER_T(array, type)->capacity)
 
 #define ARRAY_PUSH(array, type, data)                                          \
-  (type *)array_push((void *)array, (void *)data, sizeof(type),                \
+  (type *)array_push((void *)array, (void *)(data), sizeof(type),              \
                      _CARENA_ALIGNOF(type))
 
 #define ARRAY_GET_REF(array, type, index)                                      \
