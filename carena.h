@@ -96,6 +96,9 @@ void *array_get(void *array, size_t item_size, size_t alignment, size_t index);
 void *array_get_ref(void *array, size_t item_size, size_t alignment,
                     size_t index);
 
+void *array_clear(void *array, size_t item_size, size_t alignment,
+                  size_t count);
+
 // convenience macros
 #define ARRAY_INIT(arena, type)                                                \
   (type *)array_init(arena, sizeof(type), _CARENA_ARRAY_DEFAULT_INIT_CAPACITY, \
@@ -130,6 +133,9 @@ void *array_get_ref(void *array, size_t item_size, size_t alignment,
 
 #define ARRAY_GET(array, type, index) (*ARRAY_GET_REF(array, type, index))
 
+#define ARRAY_CLEAR(array, type)                                               \
+  (type *)array_clear(array, sizeof(type), _CARENA_ALIGNOF(type),              \
+                      ARRAY_LENGTH(array, type));
 #endif // !CARENA_H
 
 #ifdef CARENA_IMPLEMENTATION
@@ -262,6 +268,16 @@ void *array_push(void *array, void *data, size_t data_type_size,
          data_type_size);
 
   return new_ptr;
+}
+
+void *array_clear(void *array, size_t item_size, size_t alignment,
+                  size_t count) {
+  _ArrayHeader *h = ARRAY_HEADER(array, alignment);
+
+  void *ret = memset(array, 0, item_size * count);
+  assert(ret != NULL);
+  h->length = 0;
+  return ret;
 }
 
 #endif // CARENA_IMPLEMENTATION
